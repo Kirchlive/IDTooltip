@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: |cFF00FFFFIDTooltip|r
-## Notes: Shows Item IDs, Spell IDs, Buff/Debuff IDs in every tooltip. Zero-lag via one-time SpellRec cache.
+## Notes: Shows Item IDs, Spell IDs, Buff/Debuff IDs, Quest IDs in every tooltip. Zero-lag via one-time SpellRec cache.
 ## Author: Tetto & Teto
-## Version: 1.1.0
+## Version: 1.2.0
 ## DefaultState: enabled
 ItemIDTooltip.lua
