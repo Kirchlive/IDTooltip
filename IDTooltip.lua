@@ -101,6 +101,39 @@ local function ExtractItemId(link)
     return id
 end
 
+-- === Helper: Extract quest ID from a quest link string ===
+local function ExtractQuestId(link)
+    if not link then return nil end
+    local _, _, id = string.find(link, "quest:(%d+)")
+    return id
+end
+
+-- === Helper: Add any ID found in a hyperlink ===
+local function AddHyperlinkID(tooltip, link)
+    if not link then return end
+    local itemId = ExtractItemId(link)
+    if itemId then
+        AddIDLine(tooltip, "Item ID", itemId)
+        return
+    end
+    local questId = ExtractQuestId(link)
+    if questId then
+        AddIDLine(tooltip, "Quest ID", questId)
+        return
+    end
+    -- Spell links: |Hspell:SPELLID|h
+    local _, _, spellId = string.find(link, "spell:(%d+)")
+    if spellId then
+        AddIDLine(tooltip, "Spell ID", spellId)
+        return
+    end
+    -- Enchant links: |Henchant:ENCHANTID|h
+    local _, _, enchantId = string.find(link, "enchant:(%d+)")
+    if enchantId then
+        AddIDLine(tooltip, "Enchant ID", enchantId)
+    end
+end
+
 -- === 1. Item Tooltips: Bag Items ===
 -- SetBagItem returns hasCooldown, repairCost - MUST pass through!
 local origSetBagItem = GameTooltip.SetBagItem
@@ -132,8 +165,7 @@ local origSetHyperlink = GameTooltip.SetHyperlink
 if origSetHyperlink then
     GameTooltip.SetHyperlink = function(tooltip, link)
         origSetHyperlink(tooltip, link)
-        local itemId = ExtractItemId(link)
-        if itemId then AddIDLine(tooltip, "Item ID", itemId) end
+        AddHyperlinkID(tooltip, link)
     end
 end
 
@@ -142,8 +174,7 @@ if ItemRefTooltip and ItemRefTooltip.SetHyperlink then
     local origItemRefHL = ItemRefTooltip.SetHyperlink
     ItemRefTooltip.SetHyperlink = function(tooltip, link)
         origItemRefHL(tooltip, link)
-        local itemId = ExtractItemId(link)
-        if itemId then AddIDLine(tooltip, "Item ID", itemId) end
+        AddHyperlinkID(tooltip, link)
     end
 end
 
@@ -312,6 +343,17 @@ if origSetLootItem then
     GameTooltip.SetLootItem = function(tooltip, slot)
         origSetLootItem(tooltip, slot)
         local link = GetLootSlotLink(slot)
+        local itemId = ExtractItemId(link)
+        if itemId then AddIDLine(tooltip, "Item ID", itemId) end
+    end
+end
+
+-- === 14. Quest Log Item Tooltip Hook ===
+local origSetQuestLogItem = GameTooltip.SetQuestLogItem
+if origSetQuestLogItem then
+    GameTooltip.SetQuestLogItem = function(tooltip, itemType, index)
+        origSetQuestLogItem(tooltip, itemType, index)
+        local link = GetQuestLogItemLink(itemType, index)
         local itemId = ExtractItemId(link)
         if itemId then AddIDLine(tooltip, "Item ID", itemId) end
     end
