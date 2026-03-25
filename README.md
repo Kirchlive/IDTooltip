@@ -13,6 +13,13 @@ Shows Item, Gear, Spell, Buff, Debuff and Quest IDs in every tooltip across the 
 - **Spell Link IDs**: Vanilla uses "enchant:" format for spell links — correctly detected and labeled as "Spell ID"
 - **Zero lag**: One-time SpellRec scan at addon load (~250ms for ~22.000 spells), all hover lookups are instant table reads
 
+<p align="center">
+  <img src="https://i.imgur.com/d7wu6AY.png" alt="Cursive Raid v4.0" width="400"> <img src="https://i.imgur.com/4ESdjrI.png" alt="Cursive Raid v4.0" width="400">
+  <img src="https://i.imgur.com/1cF70q9.png" alt="Cursive Raid v4.0" width="400"> <img src="https://i.imgur.com/JwRA7Yf.png" alt="Cursive Raid v4.0" width="400">
+</p>
+
+
+
 ## How It Works
 
 At addon load, IDTooltip scans ~45.000 SpellRec entries and builds a reverse map: `"SpellName|Rank"` -> SpellID. This takes ~250ms once. Every tooltip hover after that is a simple table lookup — zero API calls, zero lag.
