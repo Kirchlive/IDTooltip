@@ -1,8 +1,8 @@
 # IDTooltip
 
-**Universal ID Tooltip for WoW 1.12 / TurtleWoW**
+**Universal ID Tooltip TurtleWoW**
 
-Shows Item IDs, Spell IDs (with correct ranks), Buff/Debuff IDs and Quest IDs in every tooltip across the entire UI — zero lag.
+Shows Item, Gear, Spell, Buff, Debuff and Quest IDs in every tooltip across the entire UI.
 
 ## Features
 
