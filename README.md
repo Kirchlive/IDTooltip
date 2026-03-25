@@ -61,4 +61,3 @@ Copy the `IDTooltip` folder to `Interface/AddOns/`.
 
 - Original concept: cyaohiri (ItemIDTooltip)
 - Extended & rewritten: Tetto & Teto
-- Built with ClaudeBridge
