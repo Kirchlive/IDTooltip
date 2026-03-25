@@ -121,16 +121,28 @@ local function AddHyperlinkID(tooltip, link)
         AddIDLine(tooltip, "Quest ID", questId)
         return
     end
-    -- Spell links: |Hspell:SPELLID|h
+    -- In Vanilla 1.12, spell links use "enchant:SPELLID" format (not "spell:")
+    -- Check "enchant:" and determine if it's a spell via SpellInfo
+    local _, _, enchantId = string.find(link, "enchant:(%d+)")
+    if enchantId then
+        local numId = tonumber(enchantId)
+        -- Check if this ID is actually a spell (has a name in SpellInfo)
+        local isSpell = false
+        if numId and SpellInfo then
+            local name = SpellInfo(numId)
+            if name then isSpell = true end
+        end
+        if isSpell then
+            AddIDLine(tooltip, "Spell ID", enchantId)
+        else
+            AddIDLine(tooltip, "Enchant ID", enchantId)
+        end
+        return
+    end
+    -- Spell links (retail format, unlikely in 1.12 but safe)
     local _, _, spellId = string.find(link, "spell:(%d+)")
     if spellId then
         AddIDLine(tooltip, "Spell ID", spellId)
-        return
-    end
-    -- Enchant links: |Henchant:ENCHANTID|h
-    local _, _, enchantId = string.find(link, "enchant:(%d+)")
-    if enchantId then
-        AddIDLine(tooltip, "Enchant ID", enchantId)
     end
 end
 
@@ -350,11 +362,29 @@ end
 
 -- === 14. Quest Log Item Tooltip Hook ===
 local origSetQuestLogItem = GameTooltip.SetQuestLogItem
-if origSetQuestLogItem then
-    GameTooltip.SetQuestLogItem = function(tooltip, itemType, index)
-        origSetQuestLogItem(tooltip, itemType, index)
-        local link = GetQuestLogItemLink(itemType, index)
-        local itemId = ExtractItemId(link)
-        if itemId then AddIDLine(tooltip, "Item ID", itemId) end
+
+-- === 15. Quest ID via SetItemRef + OnShow ===
+-- Quest links go through SetItemRef (not SetHyperlink!)
+-- We capture the link in SetItemRef, then inject the ID in OnShow
+-- (because the tooltip content isn't ready when SetItemRef fires)
+local pendingQuestId = nil
+
+local origSetItemRef = SetItemRef
+SetItemRef = function(link, text, button)
+    if link and type(link) == "string" then
+        local _, _, qId = string.find(link, "quest:(%d+)")
+        if qId then
+            pendingQuestId = qId
+        end
     end
+    return origSetItemRef(link, text, button)
 end
+
+local origItemRefOnShow = ItemRefTooltip:GetScript("OnShow")
+ItemRefTooltip:SetScript("OnShow", function()
+    if origItemRefOnShow then origItemRefOnShow() end
+    if pendingQuestId then
+        AddIDLine(ItemRefTooltip, "Quest ID", pendingQuestId)
+        pendingQuestId = nil
+    end
+end)
