@@ -1,0 +1,7 @@
+## Interface: 11200
+## Title: |cFF00FFFFIDTooltip|r
+## Notes: Shows Item IDs, Spell IDs, Buff/Debuff IDs in every tooltip. Zero-lag via one-time SpellRec cache.
+## Author: Tetto & Teto
+## Version: 1.0.0
+## DefaultState: enabled
+IDTooltip.lua
