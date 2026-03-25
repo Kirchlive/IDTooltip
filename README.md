@@ -1,6 +1,6 @@
 # IDTooltip
 
-**Universal ID Tooltip TurtleWoW**
+**Universal ID Tooltip for TurtleWoW**
 
 Shows Item, Gear, Spell, Buff, Debuff and Quest IDs in every tooltip across the entire UI.
 
