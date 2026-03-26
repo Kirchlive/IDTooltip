@@ -397,6 +397,27 @@ questInjectFrame:SetScript("OnUpdate", function()
     end
 end)
 
+-- Helper: Try to find quest ID by name from quest log
+local function LookupQuestIdByName(questName)
+    if not questName or questName == "" then return nil end
+    local numEntries = GetNumQuestLogEntries()
+    for i = 1, numEntries do
+        local title, _, _, isHeader, _, _, _, questId = GetQuestLogTitle(i)
+        if not isHeader and title == questName and questId and questId > 0 then
+            return tostring(questId)
+        end
+    end
+    return nil
+end
+
+-- Helper: Extract quest name from chat link text
+-- Format: "|cff7f7f7f|Hquest:0:0|h[The Elder's End]|h|r"
+local function ExtractQuestNameFromText(text)
+    if not text then return nil end
+    local _, _, name = string.find(text, "%[(.-)%]")
+    return name
+end
+
 -- Hook SetItemRef LATE — after all other addons have loaded
 -- This ensures we are LAST in the hook chain, so our code always fires
 local lateHookFrame = CreateFrame("Frame")
@@ -407,6 +428,17 @@ lateHookFrame:SetScript("OnEvent", function()
         if link and type(link) == "string" then
             local _, _, qId = string.find(link, "quest:(%d+)")
             if qId then
+                -- TurtleWoW bug: some new quests have quest:0:0 in links
+                -- Try to resolve via quest log name lookup
+                if qId == "0" then
+                    local questName = ExtractQuestNameFromText(text)
+                    local resolvedId = LookupQuestIdByName(questName)
+                    if resolvedId then
+                        qId = resolvedId
+                    else
+                        qId = nil  -- Don't show "Quest ID: 0"
+                    end
+                end
                 pendingQuestId = qId
             end
         end
