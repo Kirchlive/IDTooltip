@@ -363,18 +363,59 @@ end
 -- === 14. Quest Log Item Tooltip Hook ===
 local origSetQuestLogItem = GameTooltip.SetQuestLogItem
 
--- === 15. Quest ID via SetItemRef (direct injection) ===
+-- === 15. Quest ID via late-hooked SetItemRef + OnUpdate poller ===
 -- Quest links go through SetItemRef (not SetHyperlink!)
--- We inject AFTER the original call — tooltip is populated by then.
--- Old approach used OnShow, but that doesn't re-fire when
--- ItemRefTooltip is already visible (clicking a 2nd quest link).
-local origSetItemRef = SetItemRef
-SetItemRef = function(link, text, button)
-    origSetItemRef(link, text, button)
-    if link and type(link) == "string" then
-        local _, _, qId = string.find(link, "quest:(%d+)")
-        if qId then
-            AddIDLine(ItemRefTooltip, "Quest ID", qId)
+-- Link format: "quest:QUESTID:LEVEL"
+-- Problem: Other addons (pfUI, pfQuest etc.) hook SetItemRef AFTER us
+-- at addon load, overwriting our hook. Our code never fires.
+-- Solution: Delay our hook until PLAYER_LOGIN (all addons loaded).
+-- Then use an OnUpdate poller to inject after tooltip is built.
+local pendingQuestId = nil
+local questInjectFrame = CreateFrame("Frame")
+questInjectFrame.elapsed = 0
+questInjectFrame.retries = 0
+questInjectFrame:Hide()
+questInjectFrame:SetScript("OnUpdate", function()
+    local dt = arg1 or 0
+    this.elapsed = this.elapsed + dt
+    -- Wait at least 50ms for tooltip to build, retry up to ~500ms
+    if this.elapsed < 0.05 then return end
+    this.elapsed = 0
+    this.retries = this.retries + 1
+    if pendingQuestId and ItemRefTooltip:IsVisible() then
+        if ItemRefTooltip:NumLines() and ItemRefTooltip:NumLines() > 0 then
+            AddIDLine(ItemRefTooltip, "Quest ID", pendingQuestId)
+            pendingQuestId = nil
+            this:Hide()
+            return
         end
     end
-end
+    -- Give up after 10 retries (~500ms)
+    if this.retries >= 10 then
+        pendingQuestId = nil
+        this:Hide()
+    end
+end)
+
+-- Hook SetItemRef LATE — after all other addons have loaded
+-- This ensures we are LAST in the hook chain, so our code always fires
+local lateHookFrame = CreateFrame("Frame")
+lateHookFrame:RegisterEvent("PLAYER_LOGIN")
+lateHookFrame:SetScript("OnEvent", function()
+    local origSetItemRef = SetItemRef
+    SetItemRef = function(link, text, button)
+        if link and type(link) == "string" then
+            local _, _, qId = string.find(link, "quest:(%d+)")
+            if qId then
+                pendingQuestId = qId
+            end
+        end
+        origSetItemRef(link, text, button)
+        if pendingQuestId then
+            questInjectFrame.elapsed = 0
+            questInjectFrame.retries = 0
+            questInjectFrame:Show()
+        end
+    end
+    this:UnregisterEvent("PLAYER_LOGIN")
+end)
