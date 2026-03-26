@@ -428,17 +428,6 @@ lateHookFrame:SetScript("OnEvent", function()
         if link and type(link) == "string" then
             local _, _, qId = string.find(link, "quest:(%d+)")
             if qId then
-                -- TurtleWoW bug: some new quests have quest:0:0 in links
-                -- Try to resolve via quest log name lookup
-                if qId == "0" then
-                    local questName = ExtractQuestNameFromText(text)
-                    local resolvedId = LookupQuestIdByName(questName)
-                    if resolvedId then
-                        qId = resolvedId
-                    else
-                        qId = nil  -- Don't show "Quest ID: 0"
-                    end
-                end
                 pendingQuestId = qId
             end
         end
