@@ -363,28 +363,18 @@ end
 -- === 14. Quest Log Item Tooltip Hook ===
 local origSetQuestLogItem = GameTooltip.SetQuestLogItem
 
--- === 15. Quest ID via SetItemRef + OnShow ===
+-- === 15. Quest ID via SetItemRef (direct injection) ===
 -- Quest links go through SetItemRef (not SetHyperlink!)
--- We capture the link in SetItemRef, then inject the ID in OnShow
--- (because the tooltip content isn't ready when SetItemRef fires)
-local pendingQuestId = nil
-
+-- We inject AFTER the original call — tooltip is populated by then.
+-- Old approach used OnShow, but that doesn't re-fire when
+-- ItemRefTooltip is already visible (clicking a 2nd quest link).
 local origSetItemRef = SetItemRef
 SetItemRef = function(link, text, button)
+    origSetItemRef(link, text, button)
     if link and type(link) == "string" then
         local _, _, qId = string.find(link, "quest:(%d+)")
         if qId then
-            pendingQuestId = qId
+            AddIDLine(ItemRefTooltip, "Quest ID", qId)
         end
     end
-    return origSetItemRef(link, text, button)
 end
-
-local origItemRefOnShow = ItemRefTooltip:GetScript("OnShow")
-ItemRefTooltip:SetScript("OnShow", function()
-    if origItemRefOnShow then origItemRefOnShow() end
-    if pendingQuestId then
-        AddIDLine(ItemRefTooltip, "Quest ID", pendingQuestId)
-        pendingQuestId = nil
-    end
-end)
