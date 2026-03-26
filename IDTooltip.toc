@@ -4,4 +4,4 @@
 ## Author: Tetto & Teto
 ## Version: 1.2.0
 ## DefaultState: enabled
-ItemIDTooltip.lua
+IDTooltip.lua
