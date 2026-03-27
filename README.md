@@ -7,15 +7,16 @@ Shows Item, Gear, Spell, Buff, Debuff and Quest IDs in every tooltip across the 
 ## Features
 
 - **Item IDs** everywhere: Bags, Character Frame, Action Bar, Chat Links, Merchant, Quest Rewards, Loot
+- **AtlasLoot Support**: Native integration with AtlasLoot Enhanced tooltips (AtlasLootTooltip, AtlasLootTooltip2, AtlasLootCacheTooltip)
 - **Spell IDs** with correct ranks: Spellbook (Rank 1 vs Rank 7 = different IDs), Action Bar, Castbar
 - **Buff/Debuff IDs**: Default buff bar, Unit Frames, ElkBuffBar, pfUI — any addon that uses GameTooltip
-- **Quest IDs**: Chat link popups, quest windows
+- **Quest IDs**: Chat link popups, quest windows (safe C-call wrappers prevent Chat-Addon crashes)
 - **Spell Link IDs**: Vanilla uses "enchant:" format for spell links — correctly detected and labeled as "Spell ID"
 - **Zero lag**: One-time SpellRec scan at addon load (~250ms for ~22.000 spells), all hover lookups are instant table reads
 
 <p align="center">
-  <img src="https://i.imgur.com/d7wu6AY.png" alt="Cursive Raid v4.0" width="400"> <img src="https://i.imgur.com/4ESdjrI.png" alt="Cursive Raid v4.0" width="400">
-  <img src="https://i.imgur.com/1cF70q9.png" alt="Cursive Raid v4.0" width="400"> <img src="https://i.imgur.com/JwRA7Yf.png" alt="Cursive Raid v4.0" width="400">
+  <img src="https://i.imgur.com/d7wu6AY.png" alt="IDTooltip" width="400"> <img src="https://i.imgur.com/4ESdjrI.png" alt="IDTooltip" width="400">
+  <img src="https://i.imgur.com/1cF70q9.png" alt="IDTooltip" width="400"> <img src="https://i.imgur.com/JwRA7Yf.png" alt="IDTooltip" width="400">
 </p>
 
 
@@ -26,7 +27,7 @@ At addon load, IDTooltip scans ~45.000 SpellRec entries and builds a reverse map
 
 For items, the ID is extracted from the item link string. For player buffs, SuperWoW's `GetPlayerBuffID` provides exact IDs. For action bar entries, SuperWoW's `GetActionText` returns the type and ID directly. For quest links, `SetItemRef` captures the quest ID which is then injected via `OnShow`.
 
-## Hooked Tooltip Functions (15+)
+## Hooked Tooltip Functions (18+)
 
 | Hook | What |
 |---|---|
@@ -34,6 +35,9 @@ For items, the ID is extracted from the item link string. For player buffs, Supe
 | `SetInventoryItem` | Equipped gear (Character Frame) |
 | `SetHyperlink` | Chat item/spell links |
 | `ItemRefTooltip.SetHyperlink` | Chat link popup (items/spells) |
+| `AtlasLootTooltip.SetHyperlink` | AtlasLoot Enhanced primary tooltip |
+| `AtlasLootTooltip2.SetHyperlink` | AtlasLoot Enhanced secondary tooltip |
+| `AtlasLootCacheTooltip.SetHyperlink` | AtlasLoot Enhanced cache tooltip |
 | `ItemRefTooltip:OnShow` | Quest ID injection (after tooltip build) |
 | `SetItemRef` | Quest link capture from chat clicks |
 | `OnShow` | Fallback for remaining items |

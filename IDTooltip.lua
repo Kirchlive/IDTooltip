@@ -176,8 +176,10 @@ end
 local origSetHyperlink = GameTooltip.SetHyperlink
 if origSetHyperlink then
     GameTooltip.SetHyperlink = function(tooltip, link)
-        origSetHyperlink(tooltip, link)
-        AddHyperlinkID(tooltip, link)
+        if link then
+            pcall(origSetHyperlink, tooltip, link)
+            AddHyperlinkID(tooltip, link)
+        end
     end
 end
 
@@ -185,8 +187,10 @@ end
 if ItemRefTooltip and ItemRefTooltip.SetHyperlink then
     local origItemRefHL = ItemRefTooltip.SetHyperlink
     ItemRefTooltip.SetHyperlink = function(tooltip, link)
-        origItemRefHL(tooltip, link)
-        AddHyperlinkID(tooltip, link)
+        if link then
+            pcall(origItemRefHL, tooltip, link)
+            AddHyperlinkID(tooltip, link)
+        end
     end
 end
 
@@ -438,5 +442,23 @@ lateHookFrame:SetScript("OnEvent", function()
             questInjectFrame:Show()
         end
     end
+    
+    -- Add AtlasLoot support (it uses custom tooltip frames)
+    local function HookAtlasTooltip(ttName)
+        local tt = getglobal(ttName)
+        if tt and tt.SetHyperlink then
+            local origHL = tt.SetHyperlink
+            tt.SetHyperlink = function(tooltip, link)
+                if link then
+                    pcall(origHL, tooltip, link)
+                    AddHyperlinkID(tooltip, link)
+                end
+            end
+        end
+    end
+    HookAtlasTooltip("AtlasLootTooltip")
+    HookAtlasTooltip("AtlasLootTooltip2")
+    HookAtlasTooltip("AtlasLootCacheTooltip")
+    
     this:UnregisterEvent("PLAYER_LOGIN")
 end)
