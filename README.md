@@ -51,6 +51,13 @@ For items, the ID is extracted from the item link string. For player buffs, Supe
 | `SetQuestItem` | Quest reward tooltips |
 | `SetLootItem` | Loot window tooltips |
 
+## Changelog
+
+**Version 4.1 (Mar 2026)**
+- Added native integration for AtlasLoot Enhanced (AtlasLootTooltip, AtlasLootTooltip2, AtlasLootCacheTooltip)
+- Fixed "Unknown link type" C-client crash when clicking quest links with certain chat addons
+- Added safe C-call wrappers (`pcall`) for `origItemRefHL` and `origSetHyperlink` to absorb upstream errors
+
 ## Requirements
 
 - WoW 1.12.1 (Interface 11200)
